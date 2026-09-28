@@ -1,6 +1,5 @@
 // pour charger une grille depuis un fichier et la stocker en mémoire.
 //
-// src/grid.c
 #include "../include/grid.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,3 +73,4 @@ void grid_free(Grid *g)
     free(g->cells);
     free(g);
 }
+
