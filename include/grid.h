@@ -2,7 +2,7 @@
 #define GRID_H
 
 typedef struct {
-    char **cells;
+    char *cells;
     int width;
     int height;
 } Grid;
