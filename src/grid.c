@@ -11,7 +11,7 @@ Grid *grid_load(const char *filename)
     if (!f)
         return NULL;
 
-    char lines[256][256];  //max 256 lignes de 256 colonnes
+    char lines[256][256];
     int height = 0;
     int width = 0;
 
@@ -73,4 +73,3 @@ void grid_free(Grid *g)
     free(g->cells);
     free(g);
 }
-
