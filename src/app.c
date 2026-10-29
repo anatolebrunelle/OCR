@@ -1,12 +1,5 @@
 #include "../include/app.h"
 
-typedef struct {
-    GtkWidget *window;
-    GtkWidget *image_view;
-    GtkWidget *rotation_slider;
-    char *current_image_path;
-} AppState;
-
 // click open button
 static void on_open_clicked(GtkWidget *button __attribute__((unused)), 
 gpointer user_data)
