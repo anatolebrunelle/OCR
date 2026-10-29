@@ -7,6 +7,15 @@
 solver
 test
 a.out
+ocr
+preprocess-demo
+split-test
+detect-demo
+cut-demo
+
+# sorties de detect_char / cut dans le dossier courant
+/to_cut.png
+/letter/
 
 # fichiers de sortie du split
 out/
