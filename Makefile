@@ -1,7 +1,20 @@
+<<<<<<< HEAD
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude \
          $(shell pkg-config --cflags sdl2 SDL2_image)
 LDLIBS = $(shell pkg-config --libs sdl2 SDL2_image)
+=======
+CC      = gcc
+<<<<<<< Updated upstream
+CFLAGS  = -Wall -Wextra -std=c99 $(shell pkg-config --cflags sdl2 SDL2_image)
+LDLIBS  = $(shell pkg-config --libs sdl2 SDL2_image)
+=======
+CFLAGS  = -Wall -Werror -Wextra -std=c99 -fsanitize=address
+>>>>>>> Stashed changes
+SRC     = $(wildcard src/*.c)
+OBJ     = $(SRC:.c=.o)
+BIN     = solver, render
+>>>>>>> travail-lucas
 
 SOLVER_SRC = src/main.c src/grid.c src/solver.c
 PREPROCESS_SRC = src/preprocessing_cli.c src/preprocessing.c
