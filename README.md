@@ -1,9 +1,9 @@
 # OCR
-OCR pour mot mêlés en C
+OCR for word searches in C
 
-## Programme principal (ocr)
+## Main program (ocr)
 
-Dependances : SDL2, SDL2_image et pkg-config. Compilation : `make`.
+Dependencies: SDL2, SDL2_image and pkg-config. Build: `make`.
 
 ```sh
 ./ocr img/level_1_image_1.png out
@@ -11,24 +11,24 @@ Dependances : SDL2, SDL2_image et pkg-config. Compilation : `make`.
 ./ocr solve tests/grid.txt horizontal
 ```
 
-`./ocr IMAGE OUTDIR [--rotate DEGREES]` enchaine : rotation manuelle
-(angle positif = antihoraire), suppression des couleurs, detection de la
-grille et de la liste de mots, puis decoupage de chaque lettre en image.
-Chaque etape est enregistree dans `OUTDIR` :
+`./ocr IMAGE OUTDIR [--rotate DEGREES]` chains: manual rotation
+(positive angle = counterclockwise), colour removal, detection of the
+grid and of the word list, then cutting of each letter into an image.
+Each step is saved in `OUTDIR`:
 
-- `01_rotated.png` (seulement avec `--rotate`), `02_gray.png`, `03_bw.png`
-- `split/` : `grid.png` et un `word<n>.png` par mot de la liste
-- `grid/letter/` et `words/word<n>/letter/` : une image par lettre
+- `01_rotated.png` (only with `--rotate`), `02_gray.png`, `03_bw.png`
+- `split/` : `grid.png` and one `word<n>.png` per word of the list
+- `grid/letter/` and `words/word<n>/letter/`: one image per letter
 
-`./ocr solve GRID_FILE WORD` resout un mot dans une grille texte, comme le
-programme `solver` (`(x0,y0)(x1,y1)` ou `Not found`).
+`./ocr solve GRID_FILE WORD` solves a word in a text grid, like the
+`solver` program (`(x0,y0)(x1,y1)` or `Not found`).
 
-Chaque partie reste executable seule : `solver`, `preprocess-demo`,
-`split-test`, `detect-demo` et `cut-demo`. `make clean` supprime tout.
+Each part can still be run on its own: `solver`, `preprocess-demo`,
+`split-test`, `detect-demo` and `cut-demo`. `make clean` removes everything.
 
-## Pretraitement
+## Preprocessing
 
-Dependances : SDL2, SDL2_image et pkg-config.
+Dependencies: SDL2, SDL2_image and pkg-config.
 
 ```sh
 make preprocess-demo
@@ -38,12 +38,12 @@ make preprocess-demo
 ./preprocess-demo img/level_2_image_1.png cleaned.png --rotate -8 --bw
 ```
 
-Les options `--gray`, `--bw` et `--rotate DEGREES` peuvent etre combinees.
-Un angle positif correspond a une rotation antihoraire.
-Le resultat est enregistre au format PNG.
+The options `--gray`, `--bw` and `--rotate DEGREES` can be combined.
+A positive angle corresponds to a counterclockwise rotation.
+The result is saved in PNG format.
 
-Les fonctions sont declarees dans `include/preprocessing.h`.
-Elles retournent une nouvelle `SDL_Surface *` a liberer avec
-`SDL_FreeSurface`. L'image d'entree n'est pas modifiee.
+The functions are declared in `include/preprocessing.h`.
+They return a new `SDL_Surface *` to be freed with
+`SDL_FreeSurface`. The input image is not modified.
 
-Compilation : `make solver`, `make preprocess-demo` ou `make split-test`.
+Build: `make solver`, `make preprocess-demo` or `make split-test`.
