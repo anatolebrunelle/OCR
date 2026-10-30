@@ -1,6 +1,7 @@
 #include "../include/cut.h"
 
-
+/* ---------- pixel part ---------- */
+//basicaly  get_pixel
 Uint32 pix(const SDL_Surface *s, int x, int y)
 {
     const Uint32 *p = s->pixels;
@@ -9,6 +10,7 @@ Uint32 pix(const SDL_Surface *s, int x, int y)
 }
 
 /* seen = already visited, stk = stack, col = colour */
+// fl -> flood fill -> research with neighbours
 struct rect fl(const SDL_Surface *s, unsigned char *seen, int *stk, int x,
                int y)
 {
@@ -17,7 +19,6 @@ struct rect fl(const SDL_Surface *s, unsigned char *seen, int *stk, int x,
     struct rect r = { x, y, x, y };
     Uint32 col = pix(s, x, y);
     int top = 0;
-
     stk[top++] = y * s->w + x;
     seen[y * s->w + x] = 1;
     while (top > 0)
@@ -50,7 +51,7 @@ struct rect fl(const SDL_Surface *s, unsigned char *seen, int *stk, int x,
     }
     return r;
 }
-
+// mark pixels visited
 void mark(const SDL_Surface *s, unsigned char *seen, struct rect r)
 {
     int x;
@@ -60,6 +61,8 @@ void mark(const SDL_Surface *s, unsigned char *seen, struct rect r)
         for (x = r.x1; x <= r.x2; x++)
             seen[y * s->w + x] = 1;
 }
+
+//save result
 
 int sv(SDL_Surface *s, struct rect r, int n)
 {
@@ -84,14 +87,35 @@ int sv(SDL_Surface *s, struct rect r, int n)
     SDL_FreeSurface(out);
     return ret == 0 ? 0 : -1;
 }
-
-int isc(Uint32 c)
+// is colour : return 0 if is opaque
+int isc(const SDL_Surface *s, int x, int y)
 {
-    Uint32 r = (c >> 16) & 0xFF; /* r = red */
-    Uint32 g = (c >> 8) & 0xFF;  /* g = green */
-    Uint32 b = c & 0xFF;         /* b = blue */
+    Uint8 r; /* r = red */
+    Uint8 g; /* g = green */
+    Uint8 b; /* b = blue */
+    Uint8 a; /* a = alpha */
 
-    return (c >> 24) != 0 && !(r == g && g == b);
+    SDL_GetRGBA(pix(s, x, y), s->format, &r, &g, &b, &a);
+    return a != 0 && !(r == g && g == b);
+}
+
+// remove the coloured rectangle after detection
+struct rect inn(const SDL_Surface *s, struct rect r)
+{
+    Uint32 col = pix(s, r.x1, r.y1); /* col = colour of the frame */
+    struct rect in = r;              /* in = inner rectangle */
+    int t = 0;                       /* t = thickness of the frame */
+
+    while (r.x1 + t <= r.x2 && r.y1 + t <= r.y2
+           && pix(s, r.x1 + t, r.y1 + t) == col)
+        t++;
+    in.x1 += t;
+    in.y1 += t;
+    in.x2 -= t;
+    in.y2 -= t;
+    if (in.x1 > in.x2 || in.y1 > in.y2)
+        return r;
+    return in;
 }
 
 int scan(SDL_Surface *s)
@@ -111,14 +135,14 @@ int scan(SDL_Surface *s)
     {
         for (x = 0; ret == 0 && x < s->w; x++)
         {
-            Uint32 c = pix(s, x, y); /* c = colour */
+            struct rect r; /* r = rectangle found */
 
-            if (seen[y * s->w + x] || !isc(c))
+            if (seen[y * s->w + x] || !isc(s, x, y))
                 continue;
-            struct rect r = fl(s, seen, stk, x, y);
+            r = fl(s, seen, stk, x, y);
             mark(s, seen, r);
             n++;
-            ret = sv(s, r, n);
+            ret = sv(s, inn(s, r), n);
         }
     }
     free(seen);
@@ -126,10 +150,11 @@ int scan(SDL_Surface *s)
     return ret;
 }
 
+// main function called in main
 int cut(void)
 {
     SDL_Surface *raw; /* raw = image as loaded */
-    SDL_Surface *img; /* img = image converted to ARGB8888 */
+    SDL_Surface *img; /* img = image converted */
     int ret = -1;
 
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
@@ -144,7 +169,7 @@ int cut(void)
         SDL_FreeSurface(raw);
         if (img != NULL)
         {
-            if (mkdir(DIR, 0755) == 0 || errno == EEXIST)
+            if (system("mkdir -p " DIR) == 0)
                 ret = scan(img);
             SDL_FreeSurface(img);
         }
@@ -154,7 +179,9 @@ int cut(void)
         fprintf(stderr, SRC " failed\n");
     return ret;
 }
+
 int main(void){
-  cut();
-  return 0;
+    cut();
+    return 0;
+    
 }
