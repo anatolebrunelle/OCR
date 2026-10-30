@@ -33,12 +33,12 @@ struct col
     struct col *next;
 };
 
-/* ---------- pixel loading and pixel uses ---------- */
+//pixel loading and pixel uses
 SDL_Surface *loadimg(const char *path);
 Uint32 getpix(const SDL_Surface *img, int x, int y);
 Uint8 *blackmap(const SDL_Surface *img, int thr);
  
-/* ---------- lines and columns ---------- */
+//lines and columns
 int runrow(const Uint8 *blk, int w, int y);
 int runcol(const Uint8 *blk, int w, int h, int x);
 void freelines(struct line *lns);
@@ -47,15 +47,15 @@ struct line *findlines(const Uint8 *blk, int w, int h);
 struct col *findcols(const Uint8 *blk, int w, int h);
 void cleargrid(Uint8 *blk, const SDL_Surface *img);
  
-/* ---------- Colors and drawing ---------- */
+//color and drawing
 void nextcolor(struct rect *rc, int n);
 void drawrect(SDL_Renderer *rdr, const struct rect *rc);
  
-/* ---------- Blobs of pixels ---------- */
+//Blobs of pixels
 void flood(Uint8 *blk, int w, int h, int *stk, int sx, int sy, struct rect *rc);
 int scan(SDL_Renderer *rdr, SDL_Surface *img, Uint8 *blk);
  
-/* ---------- begin program ---------- */
+//begin program
 int work(SDL_Surface *img, int grid);
 int detect_char(const char *path);
 

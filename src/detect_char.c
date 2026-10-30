@@ -1,6 +1,6 @@
 #include "../include/detect_char.h"
 
-/* ---------- pixel loading and pixel uses ---------- */
+/*                                             pixel loading and pixel uses */
 
 // Loads any PNG and converts it to RGBA32 (NULL on error)
 SDL_Surface *loadimg(const char *path)
@@ -50,7 +50,7 @@ Uint8 *blackmap(const SDL_Surface *img, int thr)
     return blk;
 }
 
-/* ---------- lines and columns ---------- */
+/*                                                       lines and columns */
 
 // Longest horizontal run of black pixels in row y
 int runrow(const Uint8 *blk, int w, int y)
@@ -175,7 +175,7 @@ void cleargrid(Uint8 *blk, const SDL_Surface *img)
     freecols(cls);
 }
 
-/* ------------------- Colors and drawing --------------- */
+/*                                              Colors and drawing */
 
 // nextcolor: calculate next color
 void nextcolor(struct rect *rc, int n)
@@ -208,7 +208,7 @@ void drawrect(SDL_Renderer *rdr, const struct rect *rc)
         SDL_RenderDrawRect(rdr, &in);
     }
 }
-/* ---------- Blobs of pixels ---------- */
+/*                                                Blocks of pixels */
 
 // Flood fill (8 neighbours) from (sx, sy). Clears the visited pixels and
 // stores the bounding box of the blob in rc. stk is a scratch stack of w*h ints.
@@ -261,8 +261,8 @@ int scan(SDL_Renderer *rdr, SDL_Surface *img, Uint8 *blk)
     int h = img->h; // height
     int n = 0;      // number of characters found
     int *stk = malloc((size_t)w * (size_t)h * sizeof(int)); // stack
-    struct rect rc = { 0, 0, 0, 0, 0, 0, 0 }; // the rect (will be reused for environmental reasons)
-
+    struct rect rc = { 0, 0, 0, 0, 0, 0, 0 }; /*the rect 
+                        (will be reused for environmental reasons)*/
     if (stk == NULL)
         return -1;
     for (int y = 0; y < h; y++)
@@ -281,7 +281,7 @@ int scan(SDL_Renderer *rdr, SDL_Surface *img, Uint8 *blk)
     return n;
 }
 
-/* ---------- begin program ---------- */
+//                                   begin program
 
 // Does the work once the image is loaded. Returns 0 on success, 1 on error.
 int work(SDL_Surface *img, int grid)

@@ -80,7 +80,7 @@ int sv(SDL_Surface *s, struct rect r, int n)
     if (out == NULL)
         return -1;
     SDL_SetSurfaceBlendMode(s, SDL_BLENDMODE_NONE);
-    snprintf(path, sizeof(path), DIR "/word%d.png", n);
+    snprintf(path, sizeof(path), DIR "/letters%d.png", n);
     ret = SDL_BlitSurface(s, &area, out, NULL);
     if (ret == 0)
         ret = IMG_SavePNG(out, path);
