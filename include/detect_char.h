@@ -7,14 +7,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#define BLKMAX 128 // gray level under which a pixel belongs to a character
-#define LINEMAX 240 // gray level under which a pixel may belong to a grid line
-                    // (lines can be light gray, so this is almost white)
-#define LRATIO 80  // min % of an axis a black run must span to be a grid line
-#define PAD 3      // gap between a character and its frame
-#define THK 2      // thickness of a frame
-#define NPAL 12    // number of colors in the palette
-
 // Bounding box of a character, plus the color of its frame
 struct rect
 {
@@ -41,8 +33,30 @@ struct col
     struct col *next;
 };
 
-// Reads grille.png or word<n>.png, frames every character with a colored
-// rect and saves the result as to_cut.png. Returns 0 on success, 1 on error.
+/* ---------- pixel loading and pixel uses ---------- */
+SDL_Surface *loadimg(const char *path);
+Uint32 getpix(const SDL_Surface *img, int x, int y);
+Uint8 *blackmap(const SDL_Surface *img, int thr);
+ 
+/* ---------- lines and columns ---------- */
+int runrow(const Uint8 *blk, int w, int y);
+int runcol(const Uint8 *blk, int w, int h, int x);
+void freelines(struct line *lns);
+void freecols(struct col *cls);
+struct line *findlines(const Uint8 *blk, int w, int h);
+struct col *findcols(const Uint8 *blk, int w, int h);
+void cleargrid(Uint8 *blk, const SDL_Surface *img);
+ 
+/* ---------- Colors and drawing ---------- */
+void nextcolor(struct rect *rc, int n);
+void drawrect(SDL_Renderer *rdr, const struct rect *rc);
+ 
+/* ---------- Blobs of pixels ---------- */
+void flood(Uint8 *blk, int w, int h, int *stk, int sx, int sy, struct rect *rc);
+int scan(SDL_Renderer *rdr, SDL_Surface *img, Uint8 *blk);
+ 
+/* ---------- begin program ---------- */
+int work(SDL_Surface *img, int grid);
 int detect_char(const char *path);
 
 #endif
