@@ -186,7 +186,7 @@ static int process_split(const Split *sp, const char *outdir)
     int count;
 
     snprintf(dir, sizeof(dir), "%s/grid", outdir);
-    count = process_piece(dir, "grille.png", sp->grid);
+    count = process_piece(dir, "grid.png", sp->grid);
     if (count < 0)
         return -1;
     printf("grid : %d x %d px, %d letters\n", sp->grid->w, sp->grid->h, count);
