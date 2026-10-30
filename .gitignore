@@ -12,6 +12,8 @@ preprocess-demo
 split-test
 detect-demo
 cut-demo
+xor-demo
+app
 
 # sorties de detect_char / cut dans le dossier courant
 /to_cut.png
