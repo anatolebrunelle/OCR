@@ -1,29 +1,29 @@
-//juste la logique de recherche de mot dans la grille
+//just the word search logic in the grid
 //
 #include "../include/solver.h"
 #include <string.h>
 #include <ctype.h>
 
-// les 8 directions possibles : (dx, dy)
+// the 8 possible directions: (dx, dy)
 static const int DIRECTIONS[8][2] = {
-    { 1,  0},   // droite
-    {-1,  0},   // gauche
-    { 0,  1},   // bas
-    { 0, -1},   // haut
-    { 1,  1},   // diagonale bas-droite
-    {-1, -1},   // diagonale haut-gauche
-    { 1, -1},   // diagonale haut-droite
-    {-1,  1},   // diagonale bas-gauche
+    { 1,  0},   // right
+    {-1,  0},   // left
+    { 0,  1},   // down
+    { 0, -1},   // up
+    { 1,  1},   // diagonal down-right
+    {-1, -1},   // diagonal up-left
+    { 1, -1},   // diagonal up-right
+    {-1,  1},   // diagonal down-left
 };
 
-// vrai si la case voisine (x,y) + direction est encore dans la grille
+// true if the neighbouring cell (x,y) + direction is still inside the grid
 int check_voisins(int x, int y, int width, int height, const int *direction) {
     if (x + direction[0] < 0 || x + direction[0] >= width)   return 0;
     if (y + direction[1] < 0 || y + direction[1] >= height)  return 0;
     return 1;
 }
 
-// renvoie {x0, y0, x1, y1} si le mot commence en (x,y), NULL sinon
+// returns {x0, y0, x1, y1} if the word starts at (x,y), NULL otherwise
 int *solver(const char *word, const Grid *g, int x, int y) {
     static int res[4];
     int width = g->width;
