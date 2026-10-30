@@ -9,7 +9,6 @@ SOLVER_SRC = src/main.c src/grid.c src/solver.c
 PREPROCESS_SRC = src/preprocessing_cli.c src/preprocessing.c
 SPLIT_SRC = src/test.c src/split.c
 
-# Full program: every part chained by src/ocr.c
 OCR_OBJ = src/ocr.o src/preprocessing.o src/split.o src/grid.o src/solver.o \
           src/detect_char_lib.o src/cut_lib.o
 
@@ -21,32 +20,12 @@ ocr: $(OCR_OBJ)
 src/%.o: src/%.c $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# detect_char.c and cut.c each have their own main() and both define a
-# scan() function. To link them into the same program without editing them,
-# they are compiled here with these two names changed. Their stand-alone
-# versions (detect-demo, cut-demo) are built from the untouched sources.
 src/detect_char_lib.o: src/detect_char.c $(HEADERS)
 	$(CC) $(CFLAGS) -Dmain=detect_char_demo -Dscan=detect_scan \
 	    -c -o $@ $<
 
 src/cut_lib.o: src/cut.c $(HEADERS)
 	$(CC) $(CFLAGS) -Dmain=cut_demo -Dscan=cut_scan -c -o $@ $<
-
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude \
-         $(shell pkg-config --cflags sdl2 SDL2_image)
-LDLIBS = $(shell pkg-config --libs sdl2 SDL2_image)
-CFLAGS  = -Wall -Wextra -std=c99 $(shell pkg-config --cflags sdl2 SDL2_image)
-LDLIBS  = $(shell pkg-config --libs sdl2 SDL2_image)
-SRC     = $(wildcard src/*.c)
-OBJ     = $(SRC:.c=.o)
-BIN     = solver, render
-
-SOLVER_SRC = src/main.c src/grid.c src/solver.c
-PREPROCESS_SRC = src/preprocessing_cli.c src/preprocessing.c
-SPLIT_SRC = src/test.c src/split.c
-
-all: solver preprocess-demo
 
 solver: $(SOLVER_SRC)
 	$(CC) $(CFLAGS) -o $@ $(SOLVER_SRC) $(LDLIBS)
@@ -68,3 +47,4 @@ clean:
 	rm -f src/*.o
 
 .PHONY: all clean
+
