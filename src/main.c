@@ -1,4 +1,4 @@
-//cli et pour appeler le reste, formater ?
+//cli and to call the rest, format ?
 //
 #include <stdio.h>
 #include "../include/grid.h"

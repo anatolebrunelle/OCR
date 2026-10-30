@@ -1,7 +1,7 @@
-// decoupe une image de mots caches : la grille et les mots de la liste
-// une lettre = un paquet de pixels noirs colles ensemble
-// dans la liste les lettres sont serrees (elles forment des mots)
-// dans la grille elles sont espacees (une par case)
+// cuts a word search image: the grid and the words of the list
+// a letter = a bunch of black pixels stuck together
+// in the list the letters are tight (they form words)
+// in the grid they are spaced out (one per cell)
 //
 #include "../include/split.h"
 #include <SDL2/SDL_image.h>
@@ -10,7 +10,7 @@
 
 typedef struct {
     int x0, y0, x1, y1;
-    int count;  // nombre de lettres dans la boite
+    int count;  // number of letters in the box
 } Box;
 
 //tools 
@@ -37,7 +37,7 @@ static int box_area (const Box *b) {
     return (b->x1 - b->x0) * (b->y1 - b->y0);
 }
 
-// agrandit a pour qu'il contienne aussi b
+// grows a so that it also contains b
 static void box_union (Box *a, const Box *b) {
     if (b->x0 < a->x0) a->x0 = b->x0;
     if (b->y0 < a->y0) a->y0 = b->y0;
@@ -45,14 +45,14 @@ static void box_union (Box *a, const Box *b) {
     if (b->y1 > a->y1) a->y1 = b->y1;
 }
 
-// distance au carre entre les centres de deux boites
+// squared distance between the centers of two boxes
 static int dist2 (const Box *a, const Box *b) {
     int dx = box_cx(a) - box_cx(b);
     int dy = box_cy(a) - box_cy(b);
     return dx * dx + dy * dy;
 }
 
-// 1 si le centre de b est dans r (agrandi de margin de chaque cote)
+// 1 if the center of b is inside r (grown by margin on each side)
 static int center_inside (const Box *b, const Box *r, int margin) {
     if (box_cx(b) < r->x0 - margin) return 0;
     if (box_cx(b) > r->x1 + margin) return 0;
@@ -100,7 +100,7 @@ static void uf_union (int *p, int a, int b) {
 }
 
 //image
-// charge l'image et met un fond blanc a la place de la transparence
+// loads the image and puts a white background in place of the transparency
 static SDL_Surface *load_flat (const char *path) {
     SDL_Surface *raw = IMG_Load(path);
     if (!raw) return NULL;
@@ -113,7 +113,7 @@ static SDL_Surface *load_flat (const char *path) {
         for (int x = 0; x < s->w; x++) {
             unsigned char *p = row + 4 * x;
             int alpha = p[3];
-            // on melange chaque couleur avec du blanc
+            // we blend each color with white
             for (int c = 0; c < 3; c++) {
                 int v = p[c] * alpha + 255 * (255 - alpha);
                 p[c] = (unsigned char)(v / 255);
@@ -124,7 +124,7 @@ static SDL_Surface *load_flat (const char *path) {
     return s;
 }
 
-// cherche le meilleur seuil noir / blanc a partir de l'histogramme
+// finds the best black / white threshold from the histogram
 static int otsu (const long *hist, long total) {
     long sum = 0;
     for (int i = 0; i < 256; i++) sum += i * hist[i];
@@ -150,8 +150,8 @@ static int otsu (const long *hist, long total) {
     return thr;
 }
 
-// ink = 1 pour les pixels sombres
-// on prend le plus petit des canaux rgb pour que le texte colore compte
+// ink = 1 for dark pixels
+// we take the smallest of the rgb channels so that colored text counts
 static unsigned char *binarize (const SDL_Surface *s) {
     size_t n = (size_t)s->w * (size_t)s->h;
     unsigned char *ink = malloc(n);
@@ -185,9 +185,9 @@ static unsigned char *binarize (const SDL_Surface *s) {
     return ink;
 }
 
-//lettres
+//letters
 
-// trouve tous les paquets de pixels noirs colles ensemble
+// finds all the bunches of black pixels stuck together
 static Box *find_components (const unsigned char *ink, int w, int h, int *n) {
     size_t size = (size_t)w * (size_t)h;
     unsigned char *seen = calloc(size, 1);
@@ -201,7 +201,7 @@ static Box *find_components (const unsigned char *ink, int w, int h, int *n) {
     }
     for (int start = 0; start < (int)size; start++) {
         if (!ink[start] || seen[start]) continue;
-        // on part de ce pixel et on visite tous ses voisins noirs
+        // we start from this pixel and visit all its black neighbours
         Box b = { start % w, start / w, start % w, start / w, 1 };
         int top = 0;
         stack[top++] = start;
@@ -228,7 +228,7 @@ static Box *find_components (const unsigned char *ink, int w, int h, int *n) {
             }
         }
 
-        // si le tableau est plein on le double
+        // if the array is full we double it
         if (*n == cap) {
             cap *= 2;
             Box *tmp = realloc(v, (size_t)cap * sizeof(Box));
@@ -246,7 +246,7 @@ static Box *find_components (const unsigned char *ink, int w, int h, int *n) {
     return v;
 }
 
-// hauteur d'une lettre normale (la mediane des hauteurs)
+// height of a normal letter (the median of the heights)
 static int letter_height (const Box *c, int n, int img_h) {
     int *hs = malloc((size_t)n * sizeof(int));
     int m = 0;
@@ -268,15 +268,15 @@ static int letter_height (const Box *c, int n, int img_h) {
     return res;
 }
 
-// colle les lettres proches : un paquet = un mot, ou une lettre seule
-// (les lettres seules sont celles de la grille)
+// sticks close letters together: one bunch = a word, or a single letter
+// (the single letters are the ones in the grid)
 static Box *merge_letters (const Box *comps, int nc, int hm, int *nb) {
     Box *letters = malloc((size_t)nc * sizeof(Box));
     int nl = 0;
     *nb = 0;
     if (!letters) return NULL;
 
-    // on garde seulement les paquets qui ressemblent a une lettre
+    // we only keep the bunches that look like a letter
     for (int i = 0; i < nc; i++) {
         int bw = comps[i].x1 - comps[i].x0 + 1;
         int bh = comps[i].y1 - comps[i].y0 + 1;
@@ -285,7 +285,7 @@ static Box *merge_letters (const Box *comps, int nc, int hm, int *nb) {
             nl++;
         }
     }
-    // au moins une case pour que malloc marche meme sans lettre
+    // at least one slot so that malloc works even with no letter
     int size = nl;
     if (size == 0) size = 1;
     int *uf = uf_new(size);
@@ -294,7 +294,7 @@ static Box *merge_letters (const Box *comps, int nc, int hm, int *nb) {
         free_all(letters, uf, blobs, NULL, NULL);
         return NULL;
     }
-    // deux lettres sur la meme ligne et proches sont dans le meme mot
+    // two close letters on the same line are in the same word
     for (int i = 0; i < nl; i++) {
         for (int j = i + 1; j < nl; j++) {
             int y0 = max_int(letters[i].y0, letters[j].y0);
@@ -327,9 +327,9 @@ static Box *merge_letters (const Box *comps, int nc, int hm, int *nb) {
     return blobs;
 }
 
-//grille 
+//grid 
 
-// 1 si la boite c entoure la boite lb (a pitch pres) : c'est un cadre
+// 1 if the box c surrounds the box lb (within pitch): it is a frame
 static int is_frame (const Box *c, const Box *lb, int pitch) {
     if (c->x0 > lb->x0 || c->y0 > lb->y0) return 0;
     if (c->x1 < lb->x1 || c->y1 < lb->y1) return 0;
@@ -338,8 +338,8 @@ static int is_frame (const Box *c, const Box *lb, int pitch) {
     return 1;
 }
 
-// trouve le rectangle de la grille : le plus gros groupe de lettres seules
-// in_grid[i] vaut 1 pour chaque paquet dans la grille
+// finds the rectangle of the grid: the biggest group of single letters
+// in_grid[i] is 1 for each bunch inside the grid
 static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
                       int img_w, int img_h, unsigned char *in_grid, Box *rect) {
     int *single = NULL;
@@ -351,7 +351,7 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
     int m = 0;
     int root = 0;
 
-    // on garde les paquets qui n'ont qu'une lettre
+    // we keep the bunches that have only one letter
     single = malloc((size_t)(nb + 1) * sizeof(int));
     if (!single) return 0;
     for (int i = 0; i < nb; i++) {
@@ -362,7 +362,7 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
         return 0;
     }
 
-    // deux voisines de la grille sont a moins de 3 hauteurs de lettre
+    // two neighbours of the grid are less than 3 letter heights apart
     int lim = 32 * hm / 10;
     uf = uf_new(ns);
     size = calloc((size_t)ns, sizeof(int));
@@ -377,7 +377,7 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
         }
     }
 
-    // le plus gros groupe est la grille
+    // the biggest group is the grid
     for (int i = 0; i < ns; i++) size[uf_find(uf, i)]++;
     for (int i = 0; i < ns; i++) {
         if (size[i] > size[root]) root = i;
@@ -397,7 +397,7 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
         if (uf_find(uf, i) == root) mem[m++] = single[i];
     }
 
-    // pour chaque lettre de la grille on cherche la distance a sa voisine
+    // for each letter of the grid we look for the distance to its neighbour
     Box lb = bl[mem[0]];
     for (int i = 0; i < m; i++) {
         box_union(&lb, &bl[mem[i]]);
@@ -411,26 +411,26 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
         nn[i] = best;
     }
 
-    // pitch = distance entre deux cases (la mediane)
+    // pitch = distance between two cells (the median)
     qsort(nn, (size_t)m, sizeof(int), cmp_int);
     int pitch = isqrt(nn[m / 2]);
 
-    // deux lettres larges collees dans la grille ont pu etre ratees
-    // on les reprend si elles sont juste a cote
+    // two wide letters stuck together in the grid may have been missed
+    // we take them back if they are right next to it
     for (int i = 0; i < nb; i++) {
         if (in_grid[i] || bl[i].count > 3) continue;
         if (center_inside(&bl[i], &lb, 3 * pitch / 4)) box_union(&lb, &bl[i]);
     }
 
-    // petite marge, pas plus pour ne garder que la grille
+    // small margin, no more so that we only keep the grid
     *rect = lb;
     rect->x0 -= hm / 2;
     rect->y0 -= hm / 2;
     rect->x1 += hm / 2;
     rect->y1 += hm / 2;
 
-    // si la grille a un cadre ou des bordures, on les garde
-    // (on prend le plus petit cadre possible)
+    // if the grid has a frame or borders, we keep them
+    // (we take the smallest possible frame)
     const Box *frame = NULL;
     for (int i = 0; i < nc; i++) {
         if (!is_frame(&comps[i], &lb, pitch)) continue;
@@ -438,13 +438,13 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
     }
     if (frame) box_union(rect, frame);
 
-    // on reste dans l'image
+    // we stay inside the image
     if (rect->x0 < 0) rect->x0 = 0;
     if (rect->y0 < 0) rect->y0 = 0;
     if (rect->x1 >= img_w) rect->x1 = img_w - 1;
     if (rect->y1 >= img_h) rect->y1 = img_h - 1;
 
-    // tout ce qui est dans le rectangle fait partie de la grille
+    // everything inside the rectangle is part of the grid
     for (int i = 0; i < nb; i++) {
         if (center_inside(&bl[i], rect, 0)) in_grid[i] = 1;
     }
@@ -453,14 +453,14 @@ static int find_grid (const Box *bl, int nb, const Box *comps, int nc, int hm,
     return 1;
 }
 
-//mots
+//words
 
 static int cmp_x0 (const void *a, const void *b) {
     return ((const Box *)a)->x0 - ((const Box *)b)->x0;
 }
 
-// tri par colonne puis de haut en bas
-// la colonne est stockee dans count (inutile pour les mots)
+// sort by column then from top to bottom
+// the column is stored in count (useless for words)
 static int cmp_col_y (const void *a, const void *b) {
     const Box *p = a;
     const Box *q = b;
@@ -468,23 +468,23 @@ static int cmp_col_y (const void *a, const void *b) {
     return p->y0 - q->y0;
 }
 
-// garde les mots de la liste (hors grille) et renvoie leur nombre
-// ordre : colonne par colonne, de haut en bas
+// keeps the words of the list (outside the grid) and returns their number
+// order: column by column, from top to bottom
 static int pick_words (const Box *bl, int nb, const unsigned char *in_grid,
                        const Box *rect, int hm, Box *words) {
-    // side_of[i] : 0 gauche, 1 droite, 2 haut, 3 bas (-1 si pas un mot)
+    // side_of[i]: 0 left, 1 right, 2 top, 3 bottom (-1 if not a word)
     int *side_of = malloc((size_t)(nb + 1) * sizeof(int));
     if (!side_of) return 0;
 
-    // la liste est du cote de la grille qui a le plus de paquets
+    // the list is on the side of the grid that has the most bunches
     int side_count[4] = { 0, 0, 0, 0 };
     for (int i = 0; i < nb; i++) {
         side_of[i] = -1;
-        // les mots sont en majuscules, le texte plus petit est ignore
+        // the words are in capitals, smaller text is ignored
         if (in_grid[i] || bl[i].count < 2) continue;
         if (5 * (bl[i].y1 - bl[i].y0 + 1) < 4 * hm) continue;
 
-        // distance entre la boite et la grille, en x et en y
+        // distance between the box and the grid, in x and in y
         int cx = box_cx(&bl[i]);
         int cy = box_cy(&bl[i]);
         int dx = 0;
@@ -508,12 +508,12 @@ static int pick_words (const Box *bl, int nb, const unsigned char *in_grid,
         if (side_count[s] > side_count[side]) side = s;
     }
 
-    int tol = hm / 2;  // tolerance pour l'alignement des colonnes
+    int tol = hm / 2;  // tolerance for the column alignment
     int n = 0;
     for (int i = 0; i < nb; i++) {
         if (side_of[i] != side) continue;
-        // les mots d'une liste sont alignes a gauche
-        // on garde ceux qui ont un autre mot dans la meme colonne
+        // the words of a list are left aligned
+        // we keep those that have another word in the same column
         int aligned = 0;
         for (int j = 0; j < nb; j++) {
             if (j == i || side_of[j] != side) continue;
@@ -529,7 +529,7 @@ static int pick_words (const Box *bl, int nb, const unsigned char *in_grid,
     }
     free(side_of);
 
-    // on donne un numero de colonne a chaque mot
+    // we give a column number to each word
     qsort(words, (size_t)n, sizeof(Box), cmp_x0);
     int col_x = 0;
     for (int i = 0; i < n; i++) {
@@ -540,8 +540,8 @@ static int pick_words (const Box *bl, int nb, const unsigned char *in_grid,
     return n;
 }
 
-//resultat 
-// copie la zone b de src dans une nouvelle image (avec pad pixels autour)
+//result 
+// copies the area b of src into a new image (with pad pixels around)
 static SDL_Surface *crop (SDL_Surface *src, const Box *b, int pad) {
     int x0 = b->x0 - pad;
     int y0 = b->y0 - pad;
@@ -581,7 +581,7 @@ void split_free (Split *s) {
     free(s);
 }
 
-// fabrique le resultat : la grille et une image par mot
+// builds the result: the grid and one image per word
 static Split *build_split (SDL_Surface *img, const Box *rect, const Box *words,
                            int nw, const char *out_dir) {
     Split *res = calloc(1, sizeof(Split));
@@ -620,9 +620,9 @@ Split *split_image (const char *path, const char *out_dir) {
     Box rect = { 0, 0, 0, 0, 0 };
     int nc = 0;
     int nb = 0;
-    int hm = 0;  // hauteur d'une lettre
+    int hm = 0;  // height of a letter
 
-    // on avance etape par etape, si une etape rate on s'arrete la
+    // we go step by step, if a step fails we stop there
     unsigned char *ink = binarize(img);
     if (ink) comps = find_components(ink, img->w, img->h, &nc);
     free(ink);
