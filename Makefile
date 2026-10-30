@@ -8,15 +8,18 @@ HEADERS = $(wildcard include/*.h)
 SOLVER_SRC = src/main.c src/grid.c src/solver.c
 PREPROCESS_SRC = src/preprocessing_cli.c src/preprocessing.c
 SPLIT_SRC = src/test.c src/split.c
-
+GTK_CFLAGS = $(shell pkg-config --cflags gtk+-3.0)
+GTK_LIBS   = $(shell pkg-config --libs gtk+-3.0)
 OCR_OBJ = src/ocr.o src/preprocessing.o src/split.o src/grid.o src/solver.o \
           src/detect_char_lib.o src/cut_lib.o
 
-all: ocr solver preprocess-demo split-test detect-demo cut-demo
-
+all: ocr solver preprocess-demo split-test detect-demo cut-demo app xor-demo
+app: src/app.c $(HEADERS)
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ src/app.c $(GTK_LIBS) $(LDLIBS)
 ocr: $(OCR_OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OCR_OBJ) $(LDLIBS)
-
+xor-demo: src/xor.c
+	$(CC) $(CFLAGS) -o $@ $< -lm
 src/%.o: src/%.c $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -43,7 +46,7 @@ cut-demo: src/cut.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
 
 clean:
-	rm -f ocr solver preprocess-demo split-test detect-demo cut-demo
+	rm -f ocr solver preprocess-demo split-test detect-demo cut-demo app xor-demo
 	rm -f src/*.o
 
 .PHONY: all clean
