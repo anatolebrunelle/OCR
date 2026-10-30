@@ -11,7 +11,7 @@ int main(void)
     double inputs[4][2] = {
         {0, 0}, {0, 1}, {1, 0}, {1, 1}
     };
-    double expected[4] = {0, 1, 1, 0};
+    double expected[4] = {1, 0, 0, 1};
 
     double hidden_weights[2][2] = {
         {0.5, -0.4}, {-0.3, 0.6}
@@ -69,13 +69,13 @@ int main(void)
             for (int k = 0; k < 2; k++)
                 sum += inputs[i][k] * hidden_weights[j][k];
             hidden[j] = sigmoid(sum);
-        }
+       }
 
         double sum = output_bias;
         for (int j = 0; j < 2; j++)
             sum += hidden[j] * output_weights[j];
 
-        printf("%.0f XOR %.0f = %.4f (expected %.0f)\n",
+        printf("%.0f XNOR %.0f = %.4f (expected %.0f)\n",
                inputs[i][0], inputs[i][1], sigmoid(sum), expected[i]);
     }
 

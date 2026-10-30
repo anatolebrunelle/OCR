@@ -48,6 +48,7 @@ cut-demo: src/cut.c
 clean:
 	rm -f ocr solver preprocess-demo split-test detect-demo cut-demo app xor-demo
 	rm -f src/*.o
+	rm -rf out/
 
 .PHONY: all clean
 
