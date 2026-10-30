@@ -1,4 +1,4 @@
-//fichier pour faire les mains de tests
+//file to make the test mains
 #include "../include/split.h"
 #include <stdio.h>
 

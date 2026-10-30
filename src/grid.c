@@ -1,4 +1,4 @@
-// pour charger une grille depuis un fichier et la stocker en mémoire.
+// to load a grid from a file and store it in memory.
 //
 #include "../include/grid.h"
 #include <stdio.h>
@@ -17,21 +17,21 @@ Grid *grid_load(const char *filename)
 
     while (fgets(lines[height], sizeof(lines[height]), f))
     {
-        // enlever le '\n' final
+        // remove the final '\n'
         size_t len = strlen(lines[height]);
         if (len > 0 && lines[height][len - 1] == '\n')
             lines[height][len - 1] = '\0';
 
         int line_len = (int)strlen(lines[height]);
         if (line_len == 0)
-            continue;  // ignore les lignes vides
+            continue;  // ignore empty lines
 
         if (width == 0)
             width = line_len;
         else if (line_len != width)
         {
             fclose(f);
-            return NULL;  // lignes de longueur incoherente
+            return NULL;  // lines of inconsistent length
         }
 
         height++;
