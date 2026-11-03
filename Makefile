@@ -14,8 +14,8 @@ OCR_OBJ = src/ocr.o src/preprocessing.o src/split.o src/grid.o src/solver.o \
           src/detect_char_lib.o src/cut_lib.o
 
 all: ocr solver preprocess-demo split-test detect-demo cut-demo app xor-demo
-app: src/app.c $(HEADERS)
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ src/app.c $(GTK_LIBS) $(LDLIBS)
+app: src/app.c src/preprocessing.c $(HEADERS)
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ src/app.c src/preprocessing.c $(GTK_LIBS) $(LDLIBS)
 ocr: $(OCR_OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OCR_OBJ) $(LDLIBS)
 xor-demo: src/xor.c
@@ -51,4 +51,3 @@ clean:
 	rm -rf out/
 
 .PHONY: all clean
-
